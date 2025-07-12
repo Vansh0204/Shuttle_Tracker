@@ -5,6 +5,7 @@ require("dotenv").config();
 const http = require("http");
 
 const busRouter = require("./routes/bus");
+const authRouter = require("./routes/auth");
 const { setupSocket } = require("./socket");
 
 const app = express();
@@ -20,20 +21,35 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .then(() => console.log("✅ MongoDB connected successfully"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // API routes
 app.use("/api/buses", busRouter);
+app.use("/api/auth", authRouter);
 
 // Test route
 app.get("/", (req, res) => {
-  res.send("Shuttle Tracker API is running!");
+  res.json({ 
+    message: "🚌 Shuttle Tracker API is running!",
+    version: "1.0.0",
+    status: "active"
+  });
+});
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
 });
 
 const server = http.createServer(app);
 setupSocket(server);
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📡 API available at http://localhost:${PORT}`);
 });
